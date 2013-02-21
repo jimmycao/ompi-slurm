@@ -1,0 +1,42 @@
+1) ompi_info --param framework all/component
+	orte/runtime/orte_info_support.c   ##to open
+	##orte/tools/orte_info/orte/info.c is not mandatory for some framework
+	
+2) to make (open/select/close) component, you should add these switch in ess  
+	orte/mca/ess/base/ess_base_std_app.c
+	-----------------------------------------
+	##orte/mca/ess/base/ess_base_std_orted.c 
+		is not necessary for non-orted-related framework
+	##orte/mca/ess/hnp/ess_hnp_module.c 
+		is not necessary for non-hnp-related framework
+	
+3) compile 
+	ortecc  zz_urm.c -o zz_urm
+
+4) MCA env
+	(a)env
+		export OMPI_MCA_urm_base_verbose=10
+		export OMPI_MCA_urm=slurm
+		./zz_urm
+	(b)mpirun
+		mpirun -mca urm_base_verbose 10 -mca urm slurm zz_urm  
+	
+tips for scp code and make/make install
+1) if you add a framework or component in orte, after 
+	(scp -r your_framework vm1:~/****), then ./autogen.sh, 
+	./configure, make, make install under whole-project is mandatory  
+
+2) if you only modify some code already existed, then please just 
+	(scp your *.h *.c vm1:~/***)
+	
+	(a)if you modify the code under framework/base/, then make/make install 
+	under framework/ will only produce a libmca_framework.la, which is not 
+	included in libopen-rte.la. So you have to make/make install under the 
+	project of orte/
+	
+	(b) if you merely modify the code under framework/component, owning to 
+	the independence of compoenent,So you can direclty make/make install 
+	under its dir.
+	
+3) if you only modify the Makefile.am, IS ./autogen.sh and ./configure
+	NECESSARY?  From the website, the answer is no. (I am not sure now.) 
